@@ -128,7 +128,7 @@ void Player::UpdateTopDown(float deltaTime, const std::vector<Rectangle>& obstac
     MoveAndCollide(direction.x * playerSpeed * deltaTime,
                    direction.y * playerSpeed * deltaTime, obstacles);
     position_.x = std::clamp(position_.x, 0.0f, 800.0f - width_);
-    position_.y = std::clamp(position_.y, 0.0f, 450.0f - height_);
+    position_.y = std::clamp(position_.y, 0.0f, 384.0f - height_);
 }
 
 void Player::UpdateSideScroller(float deltaTime, const std::vector<Rectangle>& platforms)

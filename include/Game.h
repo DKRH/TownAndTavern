@@ -2,6 +2,7 @@
 
 #include "Player.h"
 #include "Creature.h"
+#include "TopDownLevel.h"
 #include <vector>
 
 class Game
@@ -28,11 +29,11 @@ private:
     void DrawHealth(int x, int y) const;
 
     Scene scene_ = Scene::Town;
+    bool editingTown_ = false;
     Player player_;
     Creature creature_;
+    TopDownLevel townLevel_;
     std::vector<Arrow> arrows_;
-    std::vector<Rectangle> townObstacles_;
     std::vector<Rectangle> roomPlatforms_;
-    Rectangle tavernDoor_;
     Rectangle roomExit_;
 };

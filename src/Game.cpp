@@ -14,22 +14,29 @@ namespace
 Game::Game()
     : player_(385.0f, 310.0f),
       creature_(640.0f, 352.0f),
-      townObstacles_{
-          { 240.0f, 65.0f, 125.0f, 95.0f }, { 435.0f, 65.0f, 125.0f, 95.0f },
-          { 80.0f, 105.0f, 42.0f, 48.0f }, { 660.0f, 265.0f, 48.0f, 54.0f }
-      },
       roomPlatforms_{
           { 0.0f, 390.0f, 800.0f, 60.0f },
           { 220.0f, 315.0f, 130.0f, 18.0f },
           { 455.0f, 255.0f, 135.0f, 18.0f }
       },
-      tavernDoor_{ 365.0f, 145.0f, 70.0f, 65.0f },
       roomExit_{ 0.0f, 320.0f, 65.0f, 70.0f }
 {
 }
 
 void Game::Update(float deltaTime)
 {
+    if (scene_ == Scene::Town &&
+        (IsKeyPressed(KEY_F1) || (editingTown_ && IsKeyPressed(KEY_ESCAPE))))
+    {
+        editingTown_ = !editingTown_;
+        return;
+    }
+    if (scene_ == Scene::Town && editingTown_)
+    {
+        townLevel_.UpdateEditor();
+        return;
+    }
+
     player_.UpdateCombat(deltaTime);
     if (scene_ == Scene::Town) UpdateTown(deltaTime);
     else UpdateSideRoom(deltaTime);
@@ -37,8 +44,10 @@ void Game::Update(float deltaTime)
 
 void Game::UpdateTown(float deltaTime)
 {
-    player_.UpdateTopDown(deltaTime, townObstacles_);
-    if (CheckCollisionRecs(player_.GetBounds(), tavernDoor_) && IsKeyPressed(KEY_E))
+    player_.UpdateTopDown(deltaTime, townLevel_.GetTownObstacles());
+    Rectangle tavernDoor{};
+    if (townLevel_.GetTavernDoor(tavernDoor) &&
+        CheckCollisionRecs(player_.GetBounds(), tavernDoor) && IsKeyPressed(KEY_E))
     {
         scene_ = Scene::SideRoom;
         player_.SetPosition(90.0f, 354.0f);
@@ -132,31 +141,19 @@ void Game::UpdateSideRoom(float deltaTime)
 void Game::Draw() const
 {
     BeginDrawing();
-    if (scene_ == Scene::Town) DrawTown();
+    if (scene_ == Scene::Town && editingTown_) townLevel_.DrawEditor();
+    else if (scene_ == Scene::Town) DrawTown();
     else DrawSideRoom();
     EndDrawing();
 }
 
 void Game::DrawTown() const
 {
-    ClearBackground({ 94, 166, 83, 255 });
-    DrawRectangle(0, 205, screenWidth, 95, { 202, 174, 117, 255 });
-    DrawRectangle(355, 0, 90, screenHeight, { 202, 174, 117, 255 });
-
-    DrawRectangle(225, 45, 345, 120, { 143, 78, 55, 255 });
-    DrawRectangle(215, 35, 365, 22, { 95, 48, 42, 255 });
-    DrawRectangle(365, 112, 70, 53, { 68, 42, 37, 255 });
-    DrawRectangle(376, 122, 48, 43, { 191, 128, 68, 255 });
-    DrawText("THE TAVERN", 320, 75, 22, RAYWHITE);
-
-    DrawCircle(101, 101, 27, DARKGREEN);
-    DrawRectangle(96, 112, 10, 35, BROWN);
-    DrawCircle(684, 255, 31, DARKGREEN);
-    DrawRectangle(679, 267, 10, 35, BROWN);
-
-    DrawText("TOWN", 20, 18, 24, DARKGREEN);
-    DrawText("WASD / arrows: move", 20, 388, 18, DARKGRAY);
-    DrawText("Walk to the tavern door and press E", 20, 414, 18, DARKGRAY);
+    ClearBackground(BLACK);
+    townLevel_.DrawTown();
+    DrawRectangle(0, 384, screenWidth, 66, { 219, 218, 203, 255 });
+    DrawText("TOWN  |  WASD / arrows: move", 20, 390, 18, DARKGREEN);
+    DrawText("Walk to the tavern door and press E  |  F1: level editor", 20, 416, 18, DARKGRAY);
     DrawHealth(650, 20);
     DrawText(TextFormat("Weapon: %s (Q)", player_.GetWeapon() == Player::Weapon::Sword ? "Sword" : "Bow"),
              570, 48, 17, DARKGREEN);
