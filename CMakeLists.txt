@@ -24,6 +24,7 @@ add_executable(TownAndTavern
     src/main.cpp
     src/Game.cpp
     src/Player.cpp
+    src/Creature.cpp
 )
 
 target_include_directories(TownAndTavern PRIVATE include)
